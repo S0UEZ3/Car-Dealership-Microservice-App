@@ -1,0 +1,12 @@
+package org.example.dataAccess.repositories;
+
+import org.example.dataAccess.models.Car;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
+
+import java.util.UUID;
+
+@Repository
+public interface ICarRepository extends JpaRepository<Car, UUID> {
+}

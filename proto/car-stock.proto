@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package carstock;
+
+option java_package = "org.example.grpc";
+option java_multiple_files = true;
+
+service CarStockService {
+  rpc GetAllCars (EmptyRequest) returns (CarsResponse);
+  rpc GetCarById (CarIdRequest) returns (CarResponse);
+}
+
+message EmptyRequest {}
+
+message CarIdRequest {
+  string id = 1;
+}
+
+message CarResponse {
+  Car car = 1;
+}
+
+message CarsResponse {
+  repeated Car cars = 1;
+}
+
+message Car {
+  string id = 1;
+  string model_id = 2;
+  string body_type = 3;
+  string fuel_type = 4;
+  double engine_power = 5;
+  double engine_volume = 6;
+  string transmission = 7;
+  string drive_type = 8;
+  string color = 9;
+  bool in_stock = 10;
+  double total_cost = 11;
+  bool available_for_test_drive = 12;
+}

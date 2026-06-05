@@ -1,0 +1,63 @@
+databaseChangeLog:
+  - changeSet:
+      id: 01-create-storage-tables
+      author: developer
+      changes:
+        - createTable:
+            tableName: cars
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: model_id, type: UUID, constraints: { nullable: false } }
+              - column: { name: body_type, type: VARCHAR(50) }
+              - column: { name: fuel_type, type: VARCHAR(50) }
+              - column: { name: engine_power, type: DOUBLE PRECISION }
+              - column: { name: engine_volume, type: DOUBLE PRECISION }
+              - column: { name: transmission, type: VARCHAR(50) }
+              - column: { name: drive_type, type: VARCHAR(50) }
+              - column: { name: color, type: VARCHAR(50) }
+              - column: { name: in_stock, type: BOOLEAN, defaultValueBoolean: true }
+              - column: { name: total_cost, type: DOUBLE PRECISION }
+              - column: { name: available_for_test_drive, type: BOOLEAN, defaultValueBoolean: false }
+              - column: { name: created_at, type: TIMESTAMP }
+              - column: { name: updated_at, type: TIMESTAMP }
+              - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false }
+
+        - createTable:
+            tableName: car_configuration
+            columns:
+              - column: { name: car_id, type: UUID, constraints: { nullable: false } }
+              - column: { name: component_id, type: UUID, constraints: { nullable: false } }
+
+        - createTable:
+            tableName: parts_stock
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: component_id, type: UUID, constraints: { nullable: false } }
+              - column: { name: quantity, type: INT, defaultValue: "0" }
+              - column: { name: reserved_quantity, type: INT, defaultValue: "0" }
+              - column: { name: created_at, type: TIMESTAMP }
+              - column: { name: updated_at, type: TIMESTAMP }
+
+        - createTable:
+            tableName: assembly_orders
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: source_order_id, type: UUID, constraints: { nullable: false } }
+              - column: { name: source_order_type, type: VARCHAR(50), constraints: { nullable: false } }
+              - column: { name: car_id, type: UUID }
+              - column: { name: car_model_id, type: UUID }
+              - column: { name: required_component_ids, type: TEXT }
+              - column: { name: responsible_manager_id, type: UUID }
+              - column: { name: status, type: VARCHAR(50), constraints: { nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP }
+              - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false }
+
+  - changeSet:
+      id: 02-add-storage-composite-keys
+      author: developer
+      changes:
+        - addPrimaryKey:
+            tableName: car_configuration
+            columnNames: car_id, component_id
+            constraintName: pk_car_configuration

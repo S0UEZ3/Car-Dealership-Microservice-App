@@ -1,0 +1,206 @@
+databaseChangeLog:
+  - changeSet:
+      id: 01-create-tables
+      author: developer
+      changes:
+        # 1. Таблица users
+        - createTable:
+            tableName: users
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: name, type: VARCHAR(255) }
+              - column: { name: email, type: VARCHAR(255) }
+              - column: { name: phone, type: VARCHAR(50) }
+              - column: { name: role, type: VARCHAR(50) }
+              - column: { name: created_at, type: TIMESTAMP }
+              - column: { name: updated_at, type: TIMESTAMP }
+              - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false }
+
+        # 2. Таблица car_models
+        - createTable:
+            tableName: car_models
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: brand, type: VARCHAR(255) }
+              - column: { name: model, type: VARCHAR(255) }
+              - column: { name: base_price, type: DOUBLE PRECISION }
+              - column: { name: created_at, type: TIMESTAMP }
+              - column: { name: updated_at, type: TIMESTAMP }
+              - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false }
+
+        # 3. Таблица components
+        - createTable:
+            tableName: components
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: type, type: VARCHAR(50), constraints: { nullable: false } }
+              - column: { name: name, type: VARCHAR(255) }
+              - column: { name: description, type: TEXT }
+              - column: { name: price, type: DOUBLE PRECISION }
+              - column: { name: created_at, type: TIMESTAMP }
+              - column: { name: updated_at, type: TIMESTAMP }
+              - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false }
+
+        # 4. Таблица component_compatible_models (связь many-to-many)
+        - createTable:
+            tableName: component_compatible_models
+            columns:
+              - column: { name: component_id, type: UUID, constraints: { nullable: false } }
+              - column: { name: model_id, type: UUID, constraints: { nullable: false } }
+
+        # 7. Таблица orders (базовая)
+        - createTable:
+            tableName: orders
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: client_id, type: UUID }
+              - column: { name: manager_id, type: UUID }
+              - column: { name: created_at, type: TIMESTAMP }
+              - column: { name: updated_at, type: TIMESTAMP }
+              - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false }
+
+        # 8. Таблица orders_in_stock
+        - createTable:
+            tableName: orders_in_stock
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: car_id, type: UUID }
+              - column: { name: status, type: VARCHAR(50) }
+
+        # 9. Таблица orders_custom
+        - createTable:
+            tableName: orders_custom
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: car_model_id, type: UUID }
+              - column: { name: status, type: VARCHAR(50) }
+
+        # 10. Таблица order_custom_components
+        - createTable:
+            tableName: order_custom_components
+            columns:
+              - column: { name: order_id, type: UUID, constraints: { nullable: false } }
+              - column: { name: component_type, type: VARCHAR(50), constraints: { nullable: false } }
+              - column: { name: component_id, type: UUID, constraints: { nullable: false } }
+
+        # 11. Таблица test_drive_request
+        - createTable:
+            tableName: test_drive_request
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: user_id, type: UUID }
+              - column: { name: car_id, type: UUID }
+              - column: { name: test_drive_start_date_time, type: TIMESTAMP }
+              - column: { name: test_drive_status, type: VARCHAR(50) }
+              - column: { name: created_at, type: TIMESTAMP }
+              - column: { name: updated_at, type: TIMESTAMP }
+              - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false }
+
+        - createTable:
+            tableName: outbox
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: event_type, type: VARCHAR(100), constraints: { nullable: false } }
+              - column: { name: payload, type: TEXT, constraints: { nullable: false } }
+              - column: { name: order_id, type: UUID }
+              - column: { name: trace_id, type: VARCHAR(100) }
+              - column: { name: status, type: VARCHAR(50), defaultValue: "PENDING" }
+              - column: { name: retry_count, type: INT, defaultValue: "0" }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: processed_at, type: TIMESTAMP }
+
+      # Добавляем внешние ключи отдельным changeSet (чтобы не было проблем с порядком)
+  - changeSet:
+      id: 02-add-foreign-keys-order-service
+      author: developer
+      changes:
+        # Foreign keys для component_compatible_models
+        - addForeignKeyConstraint:
+            baseTableName: component_compatible_models
+            baseColumnNames: component_id
+            referencedTableName: components
+            referencedColumnNames: id
+            constraintName: fk_ccm_component
+
+        - addForeignKeyConstraint:
+            baseTableName: component_compatible_models
+            baseColumnNames: model_id
+            referencedTableName: car_models
+            referencedColumnNames: id
+            constraintName: fk_ccm_model
+
+        # Foreign keys для orders
+        - addForeignKeyConstraint:
+            baseTableName: orders
+            baseColumnNames: client_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_orders_client
+
+        - addForeignKeyConstraint:
+            baseTableName: orders
+            baseColumnNames: manager_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_orders_manager
+
+        # Foreign keys для orders_in_stock (наследование)
+        - addForeignKeyConstraint:
+            baseTableName: orders_in_stock
+            baseColumnNames: id
+            referencedTableName: orders
+            referencedColumnNames: id
+            constraintName: fk_ois_order
+
+        # Foreign keys для orders_custom (наследование)
+        - addForeignKeyConstraint:
+            baseTableName: orders_custom
+            baseColumnNames: id
+            referencedTableName: orders
+            referencedColumnNames: id
+            constraintName: fk_oc_order
+
+        - addForeignKeyConstraint:
+            baseTableName: orders_custom
+            baseColumnNames: car_model_id
+            referencedTableName: car_models
+            referencedColumnNames: id
+            constraintName: fk_oc_model
+
+        # Foreign keys для order_custom_components
+        - addForeignKeyConstraint:
+            baseTableName: order_custom_components
+            baseColumnNames: order_id
+            referencedTableName: orders_custom
+            referencedColumnNames: id
+            constraintName: fk_occ_order
+
+        - addForeignKeyConstraint:
+            baseTableName: order_custom_components
+            baseColumnNames: component_id
+            referencedTableName: components
+            referencedColumnNames: id
+            constraintName: fk_occ_component
+
+        # Foreign keys для test_drive_request
+        - addForeignKeyConstraint:
+            baseTableName: test_drive_request
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_tdr_user
+
+      # Добавляем составные ключи
+  - changeSet:
+      id: 03-add-composite-keys
+      author: developer
+      changes:
+        - addPrimaryKey:
+            tableName: component_compatible_models
+            columnNames: component_id, model_id
+            constraintName: pk_component_compatible_models
+
+        - addPrimaryKey:
+            tableName: order_custom_components
+            columnNames: order_id, component_id
+            constraintName: pk_order_custom_components

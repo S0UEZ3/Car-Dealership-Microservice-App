@@ -1,0 +1,39 @@
+src/main/resources/application.yaml:
+spring:
+  application:
+    name: storage-service
+  datasource:
+    url: jdbc:postgresql://localhost:5434/storage_db
+    username: storage_user
+    password: storage_pass
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/oauth2-car-realm
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+  grpc:
+    server:
+      port: 9090
+
+server:
+  port: 8082
