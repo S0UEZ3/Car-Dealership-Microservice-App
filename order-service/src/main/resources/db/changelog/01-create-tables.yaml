@@ -3,7 +3,6 @@ databaseChangeLog:
       id: 01-create-tables
       author: developer
       changes:
-        # 1. Таблица users
         - createTable:
             tableName: users
             columns:
@@ -16,7 +15,6 @@ databaseChangeLog:
               - column: { name: updated_at, type: TIMESTAMP }
               - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false }
 
-        # 2. Таблица car_models
         - createTable:
             tableName: car_models
             columns:
@@ -28,7 +26,6 @@ databaseChangeLog:
               - column: { name: updated_at, type: TIMESTAMP }
               - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false }
 
-        # 3. Таблица components
         - createTable:
             tableName: components
             columns:
@@ -41,14 +38,12 @@ databaseChangeLog:
               - column: { name: updated_at, type: TIMESTAMP }
               - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false }
 
-        # 4. Таблица component_compatible_models (связь many-to-many)
         - createTable:
             tableName: component_compatible_models
             columns:
               - column: { name: component_id, type: UUID, constraints: { nullable: false } }
               - column: { name: model_id, type: UUID, constraints: { nullable: false } }
 
-        # 7. Таблица orders (базовая)
         - createTable:
             tableName: orders
             columns:
@@ -59,7 +54,6 @@ databaseChangeLog:
               - column: { name: updated_at, type: TIMESTAMP }
               - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false }
 
-        # 8. Таблица orders_in_stock
         - createTable:
             tableName: orders_in_stock
             columns:
@@ -67,7 +61,6 @@ databaseChangeLog:
               - column: { name: car_id, type: UUID }
               - column: { name: status, type: VARCHAR(50) }
 
-        # 9. Таблица orders_custom
         - createTable:
             tableName: orders_custom
             columns:
@@ -75,7 +68,6 @@ databaseChangeLog:
               - column: { name: car_model_id, type: UUID }
               - column: { name: status, type: VARCHAR(50) }
 
-        # 10. Таблица order_custom_components
         - createTable:
             tableName: order_custom_components
             columns:
@@ -83,7 +75,6 @@ databaseChangeLog:
               - column: { name: component_type, type: VARCHAR(50), constraints: { nullable: false } }
               - column: { name: component_id, type: UUID, constraints: { nullable: false } }
 
-        # 11. Таблица test_drive_request
         - createTable:
             tableName: test_drive_request
             columns:
@@ -109,12 +100,10 @@ databaseChangeLog:
               - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
               - column: { name: processed_at, type: TIMESTAMP }
 
-      # Добавляем внешние ключи отдельным changeSet (чтобы не было проблем с порядком)
   - changeSet:
       id: 02-add-foreign-keys-order-service
       author: developer
       changes:
-        # Foreign keys для component_compatible_models
         - addForeignKeyConstraint:
             baseTableName: component_compatible_models
             baseColumnNames: component_id
@@ -129,7 +118,6 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_ccm_model
 
-        # Foreign keys для orders
         - addForeignKeyConstraint:
             baseTableName: orders
             baseColumnNames: client_id
@@ -144,7 +132,6 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_orders_manager
 
-        # Foreign keys для orders_in_stock (наследование)
         - addForeignKeyConstraint:
             baseTableName: orders_in_stock
             baseColumnNames: id
@@ -152,7 +139,6 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_ois_order
 
-        # Foreign keys для orders_custom (наследование)
         - addForeignKeyConstraint:
             baseTableName: orders_custom
             baseColumnNames: id
@@ -167,7 +153,6 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_oc_model
 
-        # Foreign keys для order_custom_components
         - addForeignKeyConstraint:
             baseTableName: order_custom_components
             baseColumnNames: order_id
@@ -182,7 +167,6 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_occ_component
 
-        # Foreign keys для test_drive_request
         - addForeignKeyConstraint:
             baseTableName: test_drive_request
             baseColumnNames: user_id
@@ -190,7 +174,6 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_tdr_user
 
-      # Добавляем составные ключи
   - changeSet:
       id: 03-add-composite-keys
       author: developer
